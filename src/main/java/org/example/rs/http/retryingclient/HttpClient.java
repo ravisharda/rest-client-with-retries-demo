@@ -65,39 +65,38 @@ public class HttpClient {
     }
 
     /**
-     * Invokes the specified {@code uri} then fetches and returns the
+     * Invokes the specified {@code request}, then fetches and returns the
      * {@link Response}.
+     *
      * If the invocation results in retryable error occurs, retries the request
      * based on the {@link Retry} linked with the specified {@code retryName}. If
      * an entry specified by the {@code retryName} is null, uses a default
      *
-     * @param uri
-     * @param acceptedResponse
+     * @param request
      * @param retryName
      * @return
      */
-    public Response getWithRetries(String uri, String acceptedResponse,
-                                   String retryName) {
-        log.debug("uri = {}, retryName = {}", uri, retryName);
+    public Response getWithRetries(GetRequest request, String retryName) {
+        log.debug("uri = {}, retryName = {}", request.getUri(), retryName);
         Retry retry = fetchRetry(retryName);
         Supplier<Response> responseSupplier = Retry.decorateSupplier(retry,
                 () -> {
-                    Response result = get(uri, acceptedResponse);
+                    Response result = get(request);
                     return result;
                 });
 
         Response result = responseSupplier.get();
         Response.StatusType statusInfo = result.getStatusInfo();
-        log.debug("Response status for uri {}: code = {}, family = {}, reason = {}", uri,
+        log.debug("Response status for uri {}: code = {}, family = {}, reason = {}", request.getUri(),
                 statusInfo.getStatusCode(),
                 statusInfo.getFamily(),
                 statusInfo.getReasonPhrase());
         return result;
     }
 
-    public <T> T getWithRetries(Class<T> clazz, String uri, String acceptedResponse,
+    public <T> T getWithRetries(Class<T> clazz, GetRequest request,
                                 String retryName) {
-        Response response = getWithRetries(uri, acceptedResponse, retryName);
+        Response response = getWithRetries(request, retryName);
         if (response.getStatusInfo().equals(Response.Status.OK)) {
             return response.readEntity(clazz);
         } else {
@@ -105,9 +104,9 @@ public class HttpClient {
         }
     }
 
-    public <T> T get(Class<T> clazz, String uri, String... acceptedResponse) {
-        WebTarget target = client.target(URI.create(uri));
-        Response response = target.request(acceptedResponse).get();
+    public <T> T get(Class<T> clazz, GetRequest request) {
+        WebTarget target = client.target(URI.create(request.getUri()));
+        Response response = target.request(request.getAcceptedResponse()).get();
         Response.StatusType statusType = response.getStatusInfo();
         if (response.getStatusInfo().equals(Response.Status.OK)) {
             return response.readEntity(clazz);
@@ -131,9 +130,9 @@ public class HttpClient {
                 .build();
     }
 
-    public Response get(String uri, String acceptedResponse) {
-        WebTarget target = client.target(URI.create(uri));
-        return target.request(acceptedResponse).get();
+    public Response get(GetRequest request) {
+        WebTarget target = client.target(URI.create(request.getUri()));
+        return target.request(request.getAcceptedResponse()).get();
     }
 
     /**

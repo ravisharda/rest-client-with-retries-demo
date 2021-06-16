@@ -17,7 +17,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 import static java.time.temporal.ChronoUnit.SECONDS;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -68,8 +67,9 @@ public class HttpClientTests {
         );
 
         HttpClient client = new HttpClient();
-        Response response = client.getWithRetries("http://localhost:8080/my/resource",
-                "text/xml", null);
+        Response response = client.getWithRetries(
+                GetRequest.builder().uri("http://localhost:8080/my/resource").acceptedResponse("text/xml").build(),
+                null);
         assertTrue(response.getStatusInfo().equals(Response.Status.OK));
     }
 
@@ -84,7 +84,9 @@ public class HttpClientTests {
         );
 
         HttpClient client = new HttpClient();
-        Response response = client.getWithRetries("http://localhost:8080/my/resource", "text/xml", null);
+        Response response = client.getWithRetries(
+                GetRequest.builder().uri("http://localhost:8080/my/resource").acceptedResponse("text/xml").build(),
+                null);
         assertTrue(response.getStatusInfo().equals(Response.Status.MOVED_PERMANENTLY));
     }
 
@@ -129,7 +131,9 @@ public class HttpClientTests {
                 })
                 .build();
         HttpClient client = new HttpClient(customDefault);
-        Response response = client.getWithRetries("http://localhost:8080/my/resource", "text/xml", null);
+        Response response = client.getWithRetries(
+                GetRequest.builder().uri("http://localhost:8080/my/resource").acceptedResponse("text/xml").build(),
+                null);
         assertTrue(response.getStatusInfo().equals(Response.Status.MOVED_PERMANENTLY));
     }
 
@@ -137,7 +141,9 @@ public class HttpClientTests {
     public void retryOnConnectException() {
         HttpClient client = new HttpClient();
         try {
-            Response response = client.getWithRetries("http://nonexistent", "text/xml", null);
+            Response response = client.getWithRetries(
+                    GetRequest.builder().uri("http://nonexistent").acceptedResponse("text/xml").build(),
+                    null);
             fail();
         } catch (Exception e) {
             assertTrue(e.getCause() instanceof UnknownHostException);
@@ -155,7 +161,12 @@ public class HttpClientTests {
         );
 
         try {
-            new HttpClient().getWithRetries(Dummy.class, "http://localhost:8080/my/resource", "text/xml", null);
+            new HttpClient().getWithRetries(Dummy.class,
+                    GetRequest.builder()
+                            .uri("http://localhost:8080/my/resource")
+                            .acceptedResponse("text/xml")
+                            .build(),
+                    null);
             fail("ResponseNotOkException not thrown");
         } catch (ResponseNotOkException e) {
             assertTrue(e.getResponse().getStatusInfo().equals(Response.Status.BAD_REQUEST));
