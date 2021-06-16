@@ -1,4 +1,4 @@
-# Java HTTP Client with Transparent Retries: Demo
+# Java HTTP Client with Transparent Retries
 
 This project demonstrates how JAX-RS client can be wrapped to provide transparent handling of retries when invoking HTTP requests. Handling retries transparently in the wrapper relieves the calling code from having to implement complex retry logic. 
 
