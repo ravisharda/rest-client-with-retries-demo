@@ -4,12 +4,16 @@ This project demonstrates how JAX-RS client can be wrapped to provide transparen
 
 ## About the Source Code
 
-The class [HttpClient](https://github.com/ravisharda/rest-client-with-retries-demo/blob/main/src/main/java/org/example/rs/http/retryingclient/HttpClient.java) wraps `javax.ws.rs.client.Client` and performs retries transparently using one of the following retry configs: 
+The class [HttpClient](https://github.com/ravisharda/rest-client-with-retries-demo/blob/main/src/main/java/org/example/rs/http/retryingclient/HttpClient.java) wraps `javax.ws.rs.client.Client` and adds automatic retries on top of its functions. While it uses a JAX-RS Client internally, it can be used not only for REST API calls but also for other types of HTTP APIs like SOAP APIs. 
+
+The wrapper performs retries transparently using one of the following retry configurations: 
 
 * The wrapper's default retry config (which can be modified by the caller when instantiating the wrapper)
-* The specified retry config
+* The specified retry config for each HTTP operation
 
-The [HttpClientTests](https://github.com/ravisharda/rest-client-with-retries-demo/blob/main/src/test/java/org/example/rs/http/retryingclient/HttpClientTests.java) class demos the usage of the wrapper. The tests use Wiremock to run a fake REST server and to provide stubbed responses. 
+The wrapper uses [Resilience4j](https://resilience4j.readme.io/docs/retry) for retries. 
+
+The [HttpClientTests](https://github.com/ravisharda/rest-client-with-retries-demo/blob/main/src/test/java/org/example/rs/http/retryingclient/HttpClientTests.java) class demos the usage of the wrapper. The tests use [WireMock](http://wiremock.org/) for running a REST API server that provides stubbed responses. 
 Each test then uses the wrapper to demonstrate a unit of functionality. 
 
 ## Enhancement Backlog
