@@ -17,3 +17,5 @@ Each test then uses the wrapper to demonstrate a unit of functionality.
 1. Support for POST requests
 2. Support for additional request headers. Hint: Create an abstract class for requests with implementations for each method. 
 3. Demonstration of use of call-specified retry config. 
+4. Support for HTTP methods other than GET and POST. 
+5. Support for modifying client properties other than connect timeout and read timeout. 
