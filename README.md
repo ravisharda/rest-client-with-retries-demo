@@ -12,3 +12,8 @@ The class [HttpClient](https://github.com/ravisharda/rest-client-with-retries-de
 The [HttpClientTests](https://github.com/ravisharda/rest-client-with-retries-demo/blob/main/src/test/java/org/example/rs/http/retryingclient/HttpClientTests.java) class demos the usage of the wrapper. The tests use Wiremock to run a fake REST server and to provide stubbed responses. 
 Each test then uses the wrapper to demonstrate a unit of functionality. 
 
+## Future Enhancements
+
+1. Support for POST requests
+2. Support for additional request headers. Hint: Create an abstract class for requests with implementations for each method. 
+3. Demonstration of use of call-specified retry config. 
