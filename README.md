@@ -1,6 +1,6 @@
 # Java REST Client with Transparent Retries: Demo
 
-This project demonstrates how retries can be handled transparently when using Java JAX-RS client. 
+This project demonstrates how JAX-RS client can be wrapped to provide transparent handling of retries when invoking HTTP requests. 
 
 The class [HttpClient](https://github.com/ravisharda/rest-client-with-retries-demo/blob/main/src/main/java/org/example/rs/http/retryingclient/HttpClient.java) wraps `javax.ws.rs.client.Client` and performs retries transparently using one of these retry configs: 
 * The default retry config in the `HttpClient` (which can be modified by the caller)
