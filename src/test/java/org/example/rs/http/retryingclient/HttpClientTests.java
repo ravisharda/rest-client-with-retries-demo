@@ -2,6 +2,7 @@ package org.example.rs.http.retryingclient;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.github.resilience4j.retry.RetryConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -10,6 +11,8 @@ import javax.ws.rs.core.Response;
 
 import java.net.UnknownHostException;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
@@ -20,6 +23,7 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+@Slf4j
 public class HttpClientTests {
     public static WireMockServer wireMockServer = new WireMockServer(8080, 8081);
 
@@ -170,6 +174,34 @@ public class HttpClientTests {
         } catch (ResponseNotOkException e) {
             assertTrue(e.getResponse().getStatusInfo().equals(Response.Status.BAD_REQUEST));
         }
+    }
+
+    @Test
+    public void get_withExponentialBackoff_retriesWorks() {
+        long initialInterval = 1000L;
+        double multiplier = 4.0D;
+        int maxRetries = 5;
+
+        RetryConfig expoBackoffConfig = RetryConfigHelper.expBackoffConfig(initialInterval, multiplier, maxRetries,
+                null, null);
+
+        HttpClient client = new HttpClient();
+        client.addRetryConfig("expBackoff", expoBackoffConfig);
+
+        AtomicInteger numAttempts = new AtomicInteger(1);
+        Response response = client.getWithRetries(
+                GetRequest.builder().uri("http://localhost:8080/my/resource").acceptedResponse("text/xml").build(),
+                "expBackoff",
+                () -> {
+                    int currentAttempt = numAttempts.incrementAndGet();
+                    log.info("Attempt {} initiated at {}", currentAttempt, Instant.now());
+                    if (currentAttempt < 5) {
+                        return Response.serverError().build();
+                    } else {
+                        return Response.ok().build();
+                    }
+                });
+        assertTrue(response.getStatusInfo().equals(Response.Status.OK));
     }
 }
 

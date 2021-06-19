@@ -1,5 +1,6 @@
 package org.example.rs.http.retryingclient;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.RetryRegistry;
@@ -39,9 +40,9 @@ public class HttpClient {
     }
 
     public HttpClient(Client client) {
-        this(client, RetryConfiguration.regularIntervalConfig(3, 2,
-                RetryConfiguration.defaultRetryOnResponse(),
-                RetryConfiguration.defaultRetryOnException()));
+        this(client, RetryConfigHelper.regularIntervalConfig(3, 2,
+                RetryConfigHelper.defaultRetryOnResponse(),
+                RetryConfigHelper.defaultRetryOnException()));
     }
 
     public HttpClient(Client client, RetryConfig defaultRetryConfig) {
@@ -80,14 +81,19 @@ public class HttpClient {
      */
     public Response getWithRetries(GetRequest request, String retryName) {
         log.debug("uri = {}, retryName = {}", request.getUri(), retryName);
-        Retry retry = fetchRetry(retryName);
-        Supplier<Response> responseSupplier = Retry.decorateSupplier(retry,
-                () -> {
-                    Response result = get(request);
-                    return result;
-                });
+        return getWithRetries(request, retryName, () -> {
+            Response result = get(request);
+            return result;
+        });
+    }
 
-        Response result = responseSupplier.get();
+    @VisibleForTesting
+    Response getWithRetries(GetRequest request, String retryName, Supplier<Response> responseSupp) {
+        log.debug("uri = {}, retryName = {}", request.getUri(), retryName);
+        Retry retry = fetchRetry(retryName);
+        Supplier<Response> decoratedSupp = Retry.decorateSupplier(retry, responseSupp);
+
+        Response result = decoratedSupp.get();
         Response.StatusType statusInfo = result.getStatusInfo();
         log.debug("Response status for uri {}: code = {}, family = {}, reason = {}", request.getUri(),
                 statusInfo.getStatusCode(),
