@@ -34,7 +34,7 @@ public class HttpClientTests {
     }
 
     @Test
-    public void retrySucceedsInThirdRetry() {
+    public void get_withSuccessfulResponseAfter3Retries_returns200Ok() {
         configureFor("localhost", 8080);
         stubFor(get("/my/resource")
                 .inScenario("Retry")
@@ -74,7 +74,7 @@ public class HttpClientTests {
     }
 
     @Test
-    public void retryFailsForever() {
+    public void get_withNonOkResponseOnEveryRetry_returnsSameResponse() {
         configureFor("localhost", 8080);
         stubFor(get("/my/resource")
                 .willReturn(aResponse()
@@ -91,8 +91,7 @@ public class HttpClientTests {
     }
 
     @Test
-    public void usesProvidedDefaultRetryConfig() {
-        configureFor("localhost", 8080);
+    public void get_withSpecifiedDefaultRetryConfig_usesSpecifiedConfigAsDefault() {
         stubFor(get("/my/resource")
                 .inScenario("Retry")
                 .whenScenarioStateIs(STARTED)
@@ -138,7 +137,7 @@ public class HttpClientTests {
     }
 
     @Test
-    public void retryOnConnectException() {
+    public void get_withConnectException_throwsSameException() {
         HttpClient client = new HttpClient();
         try {
             Response response = client.getWithRetries(
@@ -151,7 +150,7 @@ public class HttpClientTests {
     }
 
     @Test
-    public void genericGetThrowsExceptionWhenResponseIsNotOk() {
+    public void genericGet_withNotOkResponse_ThrowsExpectedException() {
         configureFor("localhost", 8080);
         stubFor(get("/my/resource")
                 .willReturn(aResponse()

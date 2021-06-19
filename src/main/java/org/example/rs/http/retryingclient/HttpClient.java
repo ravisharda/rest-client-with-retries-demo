@@ -3,8 +3,6 @@ package org.example.rs.http.retryingclient;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.RetryRegistry;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.glassfish.jersey.client.ClientProperties;
 
@@ -12,15 +10,9 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
-import java.net.ConnectException;
 import java.net.URI;
-import java.time.Duration;
 import java.util.function.Supplier;
 
-import static java.time.temporal.ChronoUnit.SECONDS;
-
-@RequiredArgsConstructor
-@AllArgsConstructor
 @Slf4j
 /**
  * Wraps {@link Client} to provide HTTP invocation, while performing retries transparently.
@@ -33,25 +25,35 @@ import static java.time.temporal.ChronoUnit.SECONDS;
  */
 public class HttpClient {
     private static final String DEFAULT_RETRY_NAME = "defaultRetry";
+    private static final int DEFAULT_CONNECT_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+    private static final int DEFAULT_READ_TIMEOUT = 90 * 60 * 1000; // 90 minutes
+
     private final Client client;
     private final RetryRegistry retryRegistry;
-    private int connectTimeout = (int)Duration.ofMinutes(30).toMillis();
-    private int readTimeout = (int)Duration.ofMinutes(90).toMillis();
 
     public HttpClient() {
-        retryRegistry = RetryRegistry.of(defaultRetryConfig());
-        client = ClientBuilder.newBuilder()
-                .property(ClientProperties.CONNECT_TIMEOUT, connectTimeout)
-                .property(ClientProperties.READ_TIMEOUT, readTimeout)
-                .build();
+        this(ClientBuilder.newBuilder()
+                .property(ClientProperties.CONNECT_TIMEOUT, DEFAULT_CONNECT_TIMEOUT)
+                .property(ClientProperties.READ_TIMEOUT, DEFAULT_READ_TIMEOUT)
+                .build());
+    }
+
+    public HttpClient(Client client) {
+        this(client, RetryConfiguration.regularIntervalConfig(3, 2,
+                RetryConfiguration.defaultRetryOnResponse(),
+                RetryConfiguration.defaultRetryOnException()));
+    }
+
+    public HttpClient(Client client, RetryConfig defaultRetryConfig) {
+        this.retryRegistry = RetryRegistry.of(defaultRetryConfig);
+        this.client = client;
     }
 
     public HttpClient(RetryConfig defaultRetryConfig) {
-        retryRegistry = RetryRegistry.of(defaultRetryConfig);
-        client = ClientBuilder.newBuilder()
-                .property(ClientProperties.CONNECT_TIMEOUT, connectTimeout)
-                .property(ClientProperties.READ_TIMEOUT, readTimeout)
-                .build();
+        this(ClientBuilder.newBuilder()
+                .property(ClientProperties.CONNECT_TIMEOUT, DEFAULT_CONNECT_TIMEOUT)
+                .property(ClientProperties.READ_TIMEOUT, DEFAULT_READ_TIMEOUT)
+                .build(), defaultRetryConfig);
     }
 
     /**
@@ -113,21 +115,6 @@ public class HttpClient {
         } else {
             throw new ResponseNotOkException(response);
         }
-    }
-
-    /**
-     * Creates a default {@link RetryConfig}.
-     *
-     * @return {@link RetryConfig}
-     */
-    private RetryConfig defaultRetryConfig() {
-        return RetryConfig.<Response>custom()
-                .maxAttempts(3) // Will retry 2 times
-                .waitDuration(Duration.of(2, SECONDS))
-                .retryOnResult(response -> !response.getStatusInfo().equals(Response.Status.OK)
-                        && ResponseStatus.isRetryableError(response.getStatusInfo()))
-                .retryOnException(e -> e.getCause() instanceof ConnectException)
-                .build();
     }
 
     public Response get(GetRequest request) {
