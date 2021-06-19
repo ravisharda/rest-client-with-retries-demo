@@ -82,7 +82,7 @@ public class RetryConfigHelper {
      */
     static Predicate<Response> defaultRetryOnResponse() {
         return response -> !response.getStatusInfo().equals(Response.Status.OK)
-                        && ResponseStatus.isRetryableError(response.getStatusInfo());
+                        && ResponseStatusHelper.isRetryableError(response.getStatusInfo());
     }
 
     /**

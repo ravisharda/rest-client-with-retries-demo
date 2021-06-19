@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Slf4j
-public class ResponseStatus {
+public class ResponseStatusHelper {
 
     private final static Set<Response.Status> nonRetryables = nonRetryableStatuses();
 
