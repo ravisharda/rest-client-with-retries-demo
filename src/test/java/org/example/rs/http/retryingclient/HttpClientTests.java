@@ -129,9 +129,7 @@ public class HttpClientTests {
         RetryConfig customDefault = RetryConfig.<Response>custom()
                 .maxAttempts(2) // Will retry 1 times only
                 .waitDuration(Duration.of(2, SECONDS))
-                .retryOnResult(response -> {
-                    return !response.getStatusInfo().equals(Response.Status.OK);
-                })
+                .retryOnResult(response -> !response.getStatusInfo().equals(Response.Status.OK))
                 .build();
         HttpClient client = new HttpClient(customDefault);
         Response response = client.getWithRetries(
