@@ -145,7 +145,7 @@ public class HttpApiClientTests {
             Response response = client.getWithRetries(
                     GetRequest.builder().uri("http://nonexistent").acceptedResponse("text/xml").build(),
                     null);
-            fail();
+            fail("An exception should have been thrown here.");
         } catch (Exception e) {
             assertTrue(e.getCause() instanceof UnknownHostException);
         }
