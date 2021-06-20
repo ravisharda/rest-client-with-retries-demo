@@ -16,13 +16,15 @@ import java.util.function.Supplier;
 
 @Slf4j
 /**
- * Wraps {@link Client} and provides support for invoking HTTP APIs, while performing
- * retries transparently. Transparent retries allows the caller code to delegate complex retry handling logic
- * to an instance of this class.
+ * Delegates HTTP API calls to {@link Client} and retries transparently upon failure
+ * freeing up the caller from retries.
  *
- * Note: The caller can specify the retry config to use for each HTTP call. If retry config is
- * unspecified, a default retry config is used. The caller may change the default retry
- * config.
+ * This object may be configured with a default {@link RetryConfig}, otherwise it'll use
+ * a built-in one. The {@link RetryConfig} used by a method depends on whether a {@code retryName}
+ * is specified as an argument. If the {@code retryName} argument is non-null, the
+ * corresponding {@link RetryConfig} from the Retry Registry is used, otherwise the default
+ * instance is used.
+ *
  */
 public class HttpApiClient {
     private static final String DEFAULT_RETRY_NAME = "defaultRetry";
