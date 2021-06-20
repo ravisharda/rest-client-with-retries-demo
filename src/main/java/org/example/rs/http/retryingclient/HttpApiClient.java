@@ -83,7 +83,6 @@ public class HttpApiClient {
      * @return
      */
     public Response getWithRetries(@NonNull GetRequest request, String retryName) {
-        log.trace("uri = {}, retryName = {}", request.getUri(), retryName);
         return getWithRetries(request, retryName, () -> {
             Response result = get(request);
             return result;
@@ -92,7 +91,7 @@ public class HttpApiClient {
 
     @VisibleForTesting
     Response getWithRetries(@NonNull GetRequest request, String retryName, @NonNull Supplier<Response> responseSupp) {
-        log.trace("uri = {}, retryName = {}", request.getUri(), retryName);
+        log.trace("GetRequest = {}, retryName = {}", request, retryName);
         Retry retry = fetchRetry(retryName);
         Supplier<Response> decoratedSupp = Retry.decorateSupplier(retry, responseSupp);
 
