@@ -3,8 +3,10 @@ package org.example.rs.http.retryingclient;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.ToString;
 
 @Builder
+@ToString
 public class GetRequest {
     @NonNull
     @Getter
