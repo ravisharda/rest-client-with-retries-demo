@@ -11,6 +11,10 @@ import java.time.Duration;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 
+/**
+ * While clients are free to hand-roll their own instances of {@link RetryConfig} instances,
+ * this helper class makes it easier to do so.
+ */
 public class RetryConfigHelper {
 
     /**
@@ -78,7 +82,7 @@ public class RetryConfigHelper {
     /**
      * Returns the condition for which retry will happen for an HTTP response.
      *
-     * @return
+     * @return the predicate representing the condition
      */
     static Predicate<Response> defaultRetryOnResponse() {
         return response -> !response.getStatusInfo().equals(Response.Status.OK)
@@ -88,7 +92,7 @@ public class RetryConfigHelper {
     /**
      * Returns the condition for which retry will happen when exceptions occur.
      *
-     * @return
+     * @return the predicate representing the condition
      */
     static Predicate<Throwable> defaultRetryOnException() {
         return e -> e.getCause() instanceof ConnectException;
