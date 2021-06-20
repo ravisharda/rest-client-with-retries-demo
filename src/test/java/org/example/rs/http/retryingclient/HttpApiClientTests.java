@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 @Slf4j
-public class HttpClientTests {
+public class HttpApiClientTests {
     public static WireMockServer wireMockServer = new WireMockServer(8080, 8081);
 
     @BeforeClass
@@ -70,7 +70,7 @@ public class HttpClientTests {
                 .willSetStateTo("Step3")
         );
 
-        HttpClient client = new HttpClient();
+        HttpApiClient client = new HttpApiClient();
         Response response = client.getWithRetries(
                 GetRequest.builder().uri("http://localhost:8080/my/resource").acceptedResponse("text/xml").build(),
                 null);
@@ -87,7 +87,7 @@ public class HttpClientTests {
                         .withBody("<response>Some content</response>"))
         );
 
-        HttpClient client = new HttpClient();
+        HttpApiClient client = new HttpApiClient();
         Response response = client.getWithRetries(
                 GetRequest.builder().uri("http://localhost:8080/my/resource").acceptedResponse("text/xml").build(),
                 null);
@@ -131,7 +131,7 @@ public class HttpClientTests {
                 .waitDuration(Duration.of(2, SECONDS))
                 .retryOnResult(response -> !response.getStatusInfo().equals(Response.Status.OK))
                 .build();
-        HttpClient client = new HttpClient(customDefault);
+        HttpApiClient client = new HttpApiClient(customDefault);
         Response response = client.getWithRetries(
                 GetRequest.builder().uri("http://localhost:8080/my/resource").acceptedResponse("text/xml").build(),
                 null);
@@ -140,7 +140,7 @@ public class HttpClientTests {
 
     @Test
     public void get_withConnectException_throwsSameException() {
-        HttpClient client = new HttpClient();
+        HttpApiClient client = new HttpApiClient();
         try {
             Response response = client.getWithRetries(
                     GetRequest.builder().uri("http://nonexistent").acceptedResponse("text/xml").build(),
@@ -162,7 +162,7 @@ public class HttpClientTests {
         );
 
         try {
-            new HttpClient().getWithRetries(Dummy.class,
+            new HttpApiClient().getWithRetries(Dummy.class,
                     GetRequest.builder()
                             .uri("http://localhost:8080/my/resource")
                             .acceptedResponse("text/xml")
@@ -183,7 +183,7 @@ public class HttpClientTests {
         RetryConfig expoBackoffConfig = RetryConfigHelper.expBackoffConfig(initialInterval, multiplier, maxRetries,
                 null, null);
 
-        HttpClient client = new HttpClient();
+        HttpApiClient client = new HttpApiClient();
         client.addRetryConfig("expBackoff", expoBackoffConfig);
 
         AtomicInteger numAttempts = new AtomicInteger(1);

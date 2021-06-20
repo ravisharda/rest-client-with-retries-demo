@@ -16,15 +16,15 @@ import java.util.function.Supplier;
 
 @Slf4j
 /**
- * Wraps {@link Client} to provide HTTP invocation, while performing retries transparently.
- * Transparent retries allows the caller code to delegate complex retry handling logic
+ * Wraps {@link Client} and provides support for invoking HTTP APIs, while performing
+ * retries transparently. Transparent retries allows the caller code to delegate complex retry handling logic
  * to an instance of this class.
  *
  * Note: The caller can specify the retry config to use for each HTTP call. If retry config is
  * unspecified, a default retry config is used. The caller may change the default retry
  * config.
  */
-public class HttpClient {
+public class HttpApiClient {
     private static final String DEFAULT_RETRY_NAME = "defaultRetry";
     private static final int DEFAULT_CONNECT_TIMEOUT = 30 * 60 * 1000; // 30 minutes
     private static final int DEFAULT_READ_TIMEOUT = 90 * 60 * 1000; // 90 minutes
@@ -32,25 +32,25 @@ public class HttpClient {
     private final Client client;
     private final RetryRegistry retryRegistry;
 
-    public HttpClient() {
+    public HttpApiClient() {
         this(ClientBuilder.newBuilder()
                 .property(ClientProperties.CONNECT_TIMEOUT, DEFAULT_CONNECT_TIMEOUT)
                 .property(ClientProperties.READ_TIMEOUT, DEFAULT_READ_TIMEOUT)
                 .build());
     }
 
-    public HttpClient(Client client) {
+    public HttpApiClient(Client client) {
         this(client, RetryConfigHelper.regularIntervalConfig(3, 2,
                 RetryConfigHelper.defaultRetryOnResponse(),
                 RetryConfigHelper.defaultRetryOnException()));
     }
 
-    public HttpClient(Client client, RetryConfig defaultRetryConfig) {
+    public HttpApiClient(Client client, RetryConfig defaultRetryConfig) {
         this.retryRegistry = RetryRegistry.of(defaultRetryConfig);
         this.client = client;
     }
 
-    public HttpClient(RetryConfig defaultRetryConfig) {
+    public HttpApiClient(RetryConfig defaultRetryConfig) {
         this(ClientBuilder.newBuilder()
                 .property(ClientProperties.CONNECT_TIMEOUT, DEFAULT_CONNECT_TIMEOUT)
                 .property(ClientProperties.READ_TIMEOUT, DEFAULT_READ_TIMEOUT)
