@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.RetryRegistry;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.glassfish.jersey.client.ClientProperties;
 
@@ -41,18 +42,18 @@ public class HttpApiClient {
                 .build());
     }
 
-    public HttpApiClient(Client client) {
+    public HttpApiClient(@NonNull Client client) {
         this(client, RetryConfigHelper.regularIntervalConfig(3, 2,
                 RetryConfigHelper.defaultRetryOnResponse(),
                 RetryConfigHelper.defaultRetryOnException()));
     }
 
-    public HttpApiClient(Client client, RetryConfig defaultRetryConfig) {
+    public HttpApiClient(@NonNull Client client, @NonNull RetryConfig defaultRetryConfig) {
         this.retryRegistry = RetryRegistry.of(defaultRetryConfig);
         this.client = client;
     }
 
-    public HttpApiClient(RetryConfig defaultRetryConfig) {
+    public HttpApiClient(@NonNull RetryConfig defaultRetryConfig) {
         this(ClientBuilder.newBuilder()
                 .property(ClientProperties.CONNECT_TIMEOUT, DEFAULT_CONNECT_TIMEOUT)
                 .property(ClientProperties.READ_TIMEOUT, DEFAULT_READ_TIMEOUT)
@@ -62,10 +63,10 @@ public class HttpApiClient {
     /**
      * Enables callers to add a custom retry configuration to the retry registry.
      *
-     * @param name
-     * @param retryConfig
+     * @param name the name of the registry entry
+     * @param retryConfig the retry configuration
      */
-    public void addRetryConfig(String name, RetryConfig retryConfig) {
+    public void addRetryConfig(@NonNull String name, @NonNull RetryConfig retryConfig) {
         this.retryRegistry.retry(name, retryConfig);
     }
 
@@ -77,12 +78,12 @@ public class HttpApiClient {
      * based on the {@link Retry} linked with the specified {@code retryName}. If
      * an entry specified by the {@code retryName} is null, uses a default
      *
-     * @param request
-     * @param retryName
+     * @param request an object representing the HTTP GET request
+     * @param retryName the name of the {@link RetryConfig} to use
      * @return
      */
-    public Response getWithRetries(GetRequest request, String retryName) {
-        log.debug("uri = {}, retryName = {}", request.getUri(), retryName);
+    public Response getWithRetries(@NonNull GetRequest request, String retryName) {
+        log.trace("uri = {}, retryName = {}", request.getUri(), retryName);
         return getWithRetries(request, retryName, () -> {
             Response result = get(request);
             return result;
@@ -90,8 +91,8 @@ public class HttpApiClient {
     }
 
     @VisibleForTesting
-    Response getWithRetries(GetRequest request, String retryName, Supplier<Response> responseSupp) {
-        log.debug("uri = {}, retryName = {}", request.getUri(), retryName);
+    Response getWithRetries(@NonNull GetRequest request, String retryName, @NonNull Supplier<Response> responseSupp) {
+        log.trace("uri = {}, retryName = {}", request.getUri(), retryName);
         Retry retry = fetchRetry(retryName);
         Supplier<Response> decoratedSupp = Retry.decorateSupplier(retry, responseSupp);
 
@@ -104,7 +105,17 @@ public class HttpApiClient {
         return result;
     }
 
-    public <T> T getWithRetries(Class<T> clazz, GetRequest request,
+    /**
+     * Invokes the specified request, retries based on specified {@code retryName}, then
+     * unmarshalls the response into an object of the specified {@code clazz}.
+     *
+     * @param clazz
+     * @param request
+     * @param retryName
+     * @param <T>
+     * @return
+     */
+    public <T> T getWithRetries(@NonNull Class<T> clazz, @NonNull GetRequest request,
                                 String retryName) {
         Response response = getWithRetries(request, retryName);
         if (response.getStatusInfo().equals(Response.Status.OK)) {
@@ -114,7 +125,7 @@ public class HttpApiClient {
         }
     }
 
-    public <T> T get(Class<T> clazz, GetRequest request) {
+    public <T> T get(@NonNull Class<T> clazz, @NonNull GetRequest request) {
         WebTarget target = client.target(URI.create(request.getUri()));
         Response response = target.request(request.getAcceptedResponse()).get();
         Response.StatusType statusType = response.getStatusInfo();
@@ -125,7 +136,7 @@ public class HttpApiClient {
         }
     }
 
-    public Response get(GetRequest request) {
+    public Response get(@NonNull GetRequest request) {
         WebTarget target = client.target(URI.create(request.getUri()));
         return target.request(request.getAcceptedResponse()).get();
     }
