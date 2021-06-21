@@ -18,9 +18,8 @@ Each test then uses the wrapper to demonstrate a unit of functionality.
 
 ## Enhancement Backlog
 
-1. Support for HTTP POST method.
-2. Support for additional request headers. Hint: Create an abstract 
-   class for requests with implementations for each method. 
-3. Support for HTTP methods other than GET and POST. 
-4. Support for modifying client properties other than connect time-out
-   and read time-out. 
+1. Configuring URL and query parameters 
+2. Automatic API pagination
+3. HTTP POST-based requests
+4. Setting additional request headers and client properties
+5. Support for asynchronous API requests
