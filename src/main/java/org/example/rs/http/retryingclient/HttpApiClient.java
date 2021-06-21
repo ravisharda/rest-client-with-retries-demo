@@ -10,6 +10,7 @@ import org.glassfish.jersey.client.ClientProperties;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -136,8 +137,12 @@ public class HttpApiClient {
     }
 
     public Response get(@NonNull GetRequest request) {
-        WebTarget target = client.target(URI.create(request.getUri()));
-        return target.request(request.getAcceptedResponse()).get();
+        WebTarget target = client.target(request.getUri());
+        request.getQueryParams().forEach((k, v) -> target.queryParam(k, v));
+        Invocation.Builder requestBuilder = target
+                .request(request.getAcceptedResponse());
+        request.getHeaders().forEach((k, v) -> requestBuilder.header(k, v));
+        return requestBuilder.get();
     }
 
     /**

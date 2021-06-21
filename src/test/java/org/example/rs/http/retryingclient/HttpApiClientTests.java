@@ -72,7 +72,10 @@ public class HttpApiClientTests {
 
         HttpApiClient client = new HttpApiClient();
         Response response = client.getWithRetries(
-                GetRequest.builder().uri("http://localhost:8080/my/resource").acceptedResponse("text/xml").build(),
+                GetRequest.builder()
+                        .uri("http://localhost:8080/my/resource")
+                        .acceptedResponse("text/xml")
+                        .build(),
                 null);
         assertTrue(response.getStatusInfo().equals(Response.Status.OK));
     }
