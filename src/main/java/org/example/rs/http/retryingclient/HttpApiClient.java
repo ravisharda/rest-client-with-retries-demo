@@ -98,7 +98,7 @@ public class HttpApiClient {
 
         Response result = decoratedSupp.get();
         Response.StatusType statusInfo = result.getStatusInfo();
-        log.debug("Response status for uri {}: code = {}, family = {}, reason = {}", request.getUri(),
+        log.debug("Response status for uri {}: code = {}, family = {}, reason = {}", request.getTarget(),
                 statusInfo.getStatusCode(),
                 statusInfo.getFamily(),
                 statusInfo.getReasonPhrase());
@@ -126,7 +126,7 @@ public class HttpApiClient {
     }
 
     public <T> T get(@NonNull Class<T> clazz, @NonNull GetRequest request) {
-        WebTarget target = client.target(URI.create(request.getUri()));
+        WebTarget target = client.target(URI.create(request.getTarget()));
         Response response = target.request(request.getAcceptedResponse()).get();
         Response.StatusType statusType = response.getStatusInfo();
         if (response.getStatusInfo().equals(Response.Status.OK)) {
@@ -137,7 +137,7 @@ public class HttpApiClient {
     }
 
     public Response get(@NonNull GetRequest request) {
-        WebTarget target = client.target(request.getUri());
+        WebTarget target = client.target(request.getTarget());
         request.getQueryParams().forEach((k, v) -> target.queryParam(k, v));
         Invocation.Builder requestBuilder = target
                 .request(request.getAcceptedResponse());

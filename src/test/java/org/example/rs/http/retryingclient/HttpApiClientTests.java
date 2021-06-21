@@ -73,7 +73,7 @@ public class HttpApiClientTests {
         HttpApiClient client = new HttpApiClient();
         Response response = client.getWithRetries(
                 GetRequest.builder()
-                        .uri("http://localhost:8080/my/resource")
+                        .target("http://localhost:8080/my/resource")
                         .acceptedResponse("text/xml")
                         .build(),
                 null);
@@ -92,7 +92,7 @@ public class HttpApiClientTests {
 
         HttpApiClient client = new HttpApiClient();
         Response response = client.getWithRetries(
-                GetRequest.builder().uri("http://localhost:8080/my/resource").acceptedResponse("text/xml").build(),
+                GetRequest.builder().target("http://localhost:8080/my/resource").acceptedResponse("text/xml").build(),
                 null);
         assertTrue(response.getStatusInfo().equals(Response.Status.MOVED_PERMANENTLY));
     }
@@ -135,8 +135,10 @@ public class HttpApiClientTests {
                 .retryOnResult(response -> !response.getStatusInfo().equals(Response.Status.OK))
                 .build();
         HttpApiClient client = new HttpApiClient(customDefault);
-        Response response = client.getWithRetries(
-                GetRequest.builder().uri("http://localhost:8080/my/resource").acceptedResponse("text/xml").build(),
+        Response response = client.getWithRetries(GetRequest.builder()
+                        .target("http://localhost:8080/my/resource")
+                        .acceptedResponse("text/xml")
+                        .build(),
                 null);
         assertTrue(response.getStatusInfo().equals(Response.Status.MOVED_PERMANENTLY));
     }
@@ -146,7 +148,7 @@ public class HttpApiClientTests {
         HttpApiClient client = new HttpApiClient();
         try {
             Response response = client.getWithRetries(
-                    GetRequest.builder().uri("http://nonexistent").acceptedResponse("text/xml").build(),
+                    GetRequest.builder().target("http://nonexistent").acceptedResponse("text/xml").build(),
                     null);
             fail("An exception should have been thrown here.");
         } catch (Exception e) {
@@ -167,7 +169,7 @@ public class HttpApiClientTests {
         try {
             new HttpApiClient().getWithRetries(Dummy.class,
                     GetRequest.builder()
-                            .uri("http://localhost:8080/my/resource")
+                            .target("http://localhost:8080/my/resource")
                             .acceptedResponse("text/xml")
                             .build(),
                     null);
@@ -191,7 +193,7 @@ public class HttpApiClientTests {
 
         AtomicInteger numAttempts = new AtomicInteger(1);
         Response response = client.getWithRetries(
-                GetRequest.builder().uri("http://localhost:8080/my/resource").acceptedResponse("text/xml").build(),
+                GetRequest.builder().target("http://localhost:8080/my/resource").acceptedResponse("text/xml").build(),
                 "expBackoff",
                 () -> {
                     int currentAttempt = numAttempts.incrementAndGet();

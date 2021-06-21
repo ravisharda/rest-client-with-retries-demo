@@ -13,7 +13,7 @@ import java.util.Map;
 public class GetRequest {
     @NonNull
     @Getter
-    private String uri;
+    private String target;
 
     @Builder.Default
     @Getter
